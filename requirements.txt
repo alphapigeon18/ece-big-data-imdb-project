@@ -1,0 +1,5 @@
+# Extra Python packages, installed inside the Spark container
+# (pyspark, pandas and requests already ship with the image):
+#   docker exec imdb_spark pip install -r requirements.txt
+confluent-kafka>=2.3
+requests>=2.31
