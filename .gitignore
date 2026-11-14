@@ -1,0 +1,18 @@
+# Data (multi-GB, lives in the imdb_data Docker volume)
+data/
+
+# Spark artefacts inside the committed outputs
+outputs/**/_SUCCESS
+outputs/**/.*.crc
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Python / editors
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+.vscode/
+.idea/
+.DS_Store
