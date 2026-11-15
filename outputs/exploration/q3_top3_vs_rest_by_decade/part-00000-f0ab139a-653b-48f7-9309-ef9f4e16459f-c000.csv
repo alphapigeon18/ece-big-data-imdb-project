@@ -1,0 +1,6 @@
+decade,avg_top3_vote_share_pct,votes_per_film_ratio_top3_vs_rest,avg_top3_film_share_pct,top3_avg_rating,rest_avg_rating
+1980,46.0,1.04,45.6,6.02,5.97
+1990,47.2,0.89,50.7,6.02,5.97
+2000,42.0,0.86,46.1,6.02,6.17
+2010,44.1,1.4,36.9,6.08,6.22
+2020,44.1,1.23,39.8,6.05,6.13
