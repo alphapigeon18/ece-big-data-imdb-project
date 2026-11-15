@@ -1,0 +1,2 @@
+matched_edits,distinct_entities,title_edits,person_edits,first_event,last_event,avg_ingest_delay_s,p95_ingest_delay_s,events_in_closed_windows,matched_events_older_than_10min
+103,85,103,0,2026-11-15T21:16:51.000Z,2026-11-15T21:46:21.000Z,248.5,828.4,2707,21

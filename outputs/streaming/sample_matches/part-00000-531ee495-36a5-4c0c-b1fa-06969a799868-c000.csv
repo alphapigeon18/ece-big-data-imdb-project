@@ -1,0 +1,104 @@
+event_time,wiki,title,entity_type,imdb_id,display_name,confidence,delay_s
+2026-11-15T21:17:16.000Z,enwiki,Northwest Passage (TV series),title,tt0032851,Northwest Passage,high,865.9
+2026-11-15T21:17:56.000Z,enwiki,Fatherland (2026 film),title,tt37304295,Fatherland,high,828.4
+2026-11-15T21:18:16.000Z,enwiki,A Place in the World (film),title,tt0104774,A Place in the World,high,812.0
+2026-11-15T21:18:36.000Z,enwiki,The Meteor Man (film),title,tt0107563,The Meteor Man,high,793.7
+2026-11-15T21:18:56.000Z,frwiki,"Parasite (film, 2019)",title,tt6751668,Parasite,high,799.6
+2026-11-15T21:19:42.000Z,enwiki,Common Ground (2002 film),title,tt0329330,Common Ground,high,775.8
+2026-11-15T21:20:18.000Z,enwiki,Will (TV series),title,tt1636844,Will,high,741.8
+2026-11-15T21:23:48.000Z,enwiki,The Little Vampire (TV series),title,tt0192255,The Little Vampire,high,542.1
+2026-11-15T21:26:56.000Z,enwiki,Paper Tiger (2026 film),title,tt34385689,Paper Tiger,high,359.5
+2026-11-15T21:27:35.000Z,enwiki,Richie Rich (film),title,tt0110989,Richie Rich,high,321.5
+2026-11-15T21:30:53.000Z,enwiki,Kayamkulam Kochunni (2018 film),title,tt7231546,Kayamkulam Kochunni,high,129.6
+2026-11-15T21:31:08.000Z,enwiki,Club Kid (film),title,tt38058097,Club Kid,high,114.9
+2026-11-15T21:31:25.000Z,enwiki,Club Kid (film),title,tt38058097,Club Kid,high,99.3
+2026-11-15T21:35:01.000Z,enwiki,Cheaper by the Dozen (2003 film),title,tt0349205,Cheaper by the Dozen,high,2.7
+2026-11-15T21:37:48.000Z,enwiki,Son of the South (film),title,tt2235372,Son of the South,high,3.6
+2026-11-15T21:37:49.000Z,enwiki,Vibe (film),title,tt40856286,Vibe,high,3.3
+2026-11-15T21:40:20.000Z,enwiki,Malcolm X (1992 film),title,tt0104797,Malcolm X,high,6.9
+2026-11-15T21:40:24.000Z,enwiki,Bad Education (2004 film),title,tt0275491,Bad Education,high,3.9
+2026-11-15T21:41:01.000Z,enwiki,The Body (TV series),title,tt1937149,The Body,high,5.2
+2026-11-15T21:42:10.000Z,enwiki,Digimon Adventure (film),title,tt0210418,Digimon Adventure,high,3.4
+2026-11-15T21:42:52.000Z,enwiki,The Visit (TV series),title,tt3567288,The Visit,high,2.8
+2026-11-15T21:44:45.000Z,enwiki,The Village (2004 film),title,tt0368447,The Village,high,3.1
+2026-11-15T21:46:07.000Z,enwiki,Dust (2001 film),title,tt0243232,Dust,high,2.4
+2026-11-15T21:16:51.000Z,enwiki,All Grown Up!,title,tt0387714,All Grown Up!,medium,889.1
+2026-11-15T21:16:51.000Z,enwiki,Robotech,title,tt0088595,Robotech,medium,889.2
+2026-11-15T21:16:53.000Z,enwiki,Time for Revenge,title,tt0083203,Time for Revenge,medium,887.3
+2026-11-15T21:17:56.000Z,enwiki,The Stranger (1987 film),title,tt9698480,The Stranger,medium,828.2
+2026-11-15T21:18:06.000Z,enwiki,The Doors,title,tt0101761,The Doors,medium,821.5
+2026-11-15T21:20:02.000Z,enwiki,Roma (2004 film),title,tt6155172,Roma,medium,757.1
+2026-11-15T21:20:18.000Z,enwiki,Oz the Great and Powerful,title,tt1623205,Oz the Great and Powerful,medium,742.1
+2026-11-15T21:20:19.000Z,enwiki,Ranabaali,title,tt32324552,Ranabaali,medium,740.9
+2026-11-15T21:20:42.000Z,enwiki,Under the Bridge,title,tt1640719,Under the Bridge,medium,719.9
+2026-11-15T21:21:54.000Z,enwiki,Facing the Giants,title,tt0805526,Facing the Giants,medium,651.8
+2026-11-15T21:22:30.000Z,enwiki,While at War,title,tt7818580,While at War,medium,617.4
+2026-11-15T21:22:33.000Z,frwiki,Zubeidaa,title,tt0255713,Zubeidaa,medium,614.4
+2026-11-15T21:22:36.000Z,enwiki,Memories of Underdevelopment,title,tt0063291,Memories of Underdevelopment,medium,611.5
+2026-11-15T21:22:49.000Z,enwiki,The 1619 Project,title,tt14489308,The 1619 Project,medium,599.0
+2026-11-15T21:23:16.000Z,enwiki,Big City Greens,title,tt7165904,Big City Greens,medium,573.3
+2026-11-15T21:23:45.000Z,enwiki,Oz the Great and Powerful,title,tt1623205,Oz the Great and Powerful,medium,545.2
+2026-11-15T21:23:46.000Z,enwiki,ThanksKilling,title,tt1129441,ThanksKilling,medium,544.1
+2026-11-15T21:24:32.000Z,enwiki,While at War,title,tt7818580,While at War,medium,499.5
+2026-11-15T21:25:28.000Z,enwiki,Marseille,title,tt4003966,Marseille,medium,444.9
+2026-11-15T21:25:29.000Z,frwiki,Sound! Euphonium,title,tt4384306,Sound! Euphonium,medium,443.8
+2026-11-15T21:26:22.000Z,enwiki,Last Christmas,title,tt8623904,Last Christmas,medium,393.0
+2026-11-15T21:26:42.000Z,enwiki,While at War,title,tt7818580,While at War,medium,373.3
+2026-11-15T21:27:07.000Z,enwiki,Wanted (2011 film),title,tt0493464,Wanted,medium,348.9
+2026-11-15T21:27:24.000Z,enwiki,Comes a Horseman,title,tt0077360,Comes a Horseman,medium,332.3
+2026-11-15T21:28:11.000Z,enwiki,Shiva (2012 film),title,tt0248428,Shiva,medium,286.9
+2026-11-15T21:28:12.000Z,enwiki,Dina,title,tt6333058,Dina,medium,285.9
+2026-11-15T21:28:14.000Z,enwiki,Shiva (2012 film),title,tt0248428,Shiva,medium,283.9
+2026-11-15T21:28:47.000Z,frwiki,Thor,title,tt0800369,Thor,medium,251.7
+2026-11-15T21:28:52.000Z,enwiki,Diego Maradona,title,tt5433114,Diego Maradona,medium,247.3
+2026-11-15T21:28:57.000Z,enwiki,While at War,title,tt7818580,While at War,medium,241.9
+2026-11-15T21:30:03.000Z,enwiki,Sivaji,title,tt0479751,Sivaji,medium,177.4
+2026-11-15T21:30:19.000Z,enwiki,Shetland,title,tt2396135,Shetland,medium,162.1
+2026-11-15T21:30:59.000Z,enwiki,While at War,title,tt7818580,While at War,medium,123.7
+2026-11-15T21:31:06.000Z,enwiki,Diego Maradona,title,tt5433114,Diego Maradona,medium,118.1
+2026-11-15T21:31:31.000Z,enwiki,Hampstead,title,tt5153236,Hampstead,medium,93.7
+2026-11-15T21:33:11.000Z,enwiki,Diego Maradona,title,tt5433114,Diego Maradona,medium,14.2
+2026-11-15T21:33:22.000Z,enwiki,Two Prosecutors,title,tt35521200,Two Prosecutors,medium,3.4
+2026-11-15T21:34:05.000Z,enwiki,Diego Maradona,title,tt5433114,Diego Maradona,medium,37.5
+2026-11-15T21:34:35.000Z,enwiki,Alex,title,tt6681686,Alex,medium,9.9
+2026-11-15T21:34:47.000Z,enwiki,All Grown Up,title,tt0387714,All Grown Up!,medium,2.2
+2026-11-15T21:36:57.000Z,enwiki,All Grown Up!,title,tt0387714,All Grown Up!,medium,3.7
+2026-11-15T21:37:26.000Z,enwiki,All Grown Up,title,tt0387714,All Grown Up!,medium,2.1
+2026-11-15T21:38:03.000Z,enwiki,While at War,title,tt7818580,While at War,medium,1.5
+2026-11-15T21:38:12.000Z,enwiki,San Antonio,title,tt0038048,San Antonio,medium,13.0
+2026-11-15T21:39:14.000Z,enwiki,Charcoal,title,tt21637282,Charcoal,medium,4.2
+2026-11-15T21:39:31.000Z,enwiki,The Piano,title,tt0107822,The Piano,medium,6.1
+2026-11-15T21:39:42.000Z,enwiki,Charcoal,title,tt21637282,Charcoal,medium,2.2
+2026-11-15T21:40:23.000Z,enwiki,National Lampoon's European Vacation,title,tt0089670,National Lampoon's European Vacation,medium,3.1
+2026-11-15T21:40:37.000Z,enwiki,Out of the Blue (2006 film),title,tt0081291,Out of the Blue,medium,3.0
+2026-11-15T21:41:11.000Z,enwiki,Dragon Ball: Curse of the Blood Rubies,title,tt0142251,Dragon Ball: Curse of the Blood Rubies,medium,5.2
+2026-11-15T21:41:18.000Z,enwiki,While at War,title,tt7818580,While at War,medium,2.3
+2026-11-15T21:41:32.000Z,enwiki,National Lampoon's Christmas Vacation,title,tt0097958,National Lampoon's Christmas Vacation,medium,3.0
+2026-11-15T21:41:57.000Z,enwiki,How to Rob a Bank (2026 film),title,tt0762104,How to Rob a Bank (and 10 Tips to Actually Get Away with It),medium,4.0
+2026-11-15T21:42:11.000Z,enwiki,Digimon Adventure: Last Evolution Kizuna,title,tt9507234,Digimon Adventure: Last Evolution Kizuna,medium,5.6
+2026-11-15T21:42:14.000Z,enwiki,Digimon: The Movie,title,tt0259974,Digimon: The Movie,medium,3.0
+2026-11-15T21:42:15.000Z,enwiki,Dragon Ball Z: Bojack Unbound,title,tt0142238,Dragon Ball Z: Bojack Unbound,medium,3.4
+2026-11-15T21:42:16.000Z,enwiki,Dragon Ball Z: Broly – Second Coming,title,tt0142239,Dragon Ball Z: Broly - Second Coming,medium,2.1
+2026-11-15T21:42:16.000Z,enwiki,Dragon Ball Z: Broly – The Legendary Super Saiyan,title,tt0142242,Dragon Ball Z: Broly - The Legendary Super Saiyan,medium,3.5
+2026-11-15T21:42:17.000Z,enwiki,Dragon Ball Z: Cooler's Revenge,title,tt1125254,Dragon Ball Z: Cooler's Revenge,medium,1.9
+2026-11-15T21:42:18.000Z,enwiki,Dragon Ball Z: Lord Slug,title,tt0142244,Dragon Ball Z: Lord Slug,medium,2.4
+2026-11-15T21:42:19.000Z,enwiki,Dragon Ball Z: The Return of Cooler,title,tt0142237,Dragon Ball Z: The Return of Cooler,medium,2.2
+2026-11-15T21:42:19.000Z,enwiki,Dragon Ball Z: Super Android 13!,title,tt0142241,Dragon Ball Z: Super Android 13!,medium,2.5
+2026-11-15T21:42:20.000Z,enwiki,Dragon Ball Z: The World's Strongest,title,tt0142240,Dragon Ball Z: The World's Strongest,medium,2.9
+2026-11-15T21:42:21.000Z,enwiki,Dragon Ball: Curse of the Blood Rubies,title,tt0142251,Dragon Ball: Curse of the Blood Rubies,medium,2.6
+2026-11-15T21:42:21.000Z,enwiki,Dragon Ball Z: Wrath of the Dragon,title,tt0142243,Dragon Ball Z: Wrath of the Dragon,medium,2.6
+2026-11-15T21:42:22.000Z,enwiki,Dragon Ball: Mystical Adventure,title,tt0142248,Dragon Ball: Mystical Adventure,medium,3.3
+2026-11-15T21:42:22.000Z,enwiki,Dragon Ball: Sleeping Princess in Devil's Castle,title,tt0142249,Dragon Ball: Sleeping Princess in Devil's Castle,medium,3.3
+2026-11-15T21:42:23.000Z,enwiki,Dragon Ball: The Path to Power,title,tt0142250,Dragon Ball: The Path to Power,medium,2.9
+2026-11-15T21:43:16.000Z,enwiki,Blind Detective,title,tt2332707,Blind Detective,medium,2.8
+2026-11-15T21:45:25.000Z,frwiki,Lajja,title,tt0293342,Lajja,medium,6.6
+2026-11-15T21:45:38.000Z,enwiki,Zack Snyder's Justice League,title,tt12361974,Zack Snyder's Justice League,medium,10.4
+2026-11-15T21:46:21.000Z,enwiki,Shadows (2007 film),title,tt0053270,Shadows,medium,1.5
+2026-11-15T21:17:50.000Z,enwiki,Alaska,title,tt0115493,Alaska,low,835.3
+2026-11-15T21:30:15.000Z,enwiki,Players,title,tt14833464,Players,low,165.8
+2026-11-15T21:33:03.000Z,enwiki,Popcorn,title,tt0102690,Popcorn,low,4.5
+2026-11-15T21:42:20.000Z,enwiki,Dragon Ball Z: The Tree of Might,title,tt0142233,Dragon Ball Z: The Tree of Might,low,1.9
+2026-11-15T21:43:34.000Z,enwiki,Silent Night,title,tt15799866,Silent Night,low,5.6
+2026-11-15T21:43:47.000Z,enwiki,Silent Night,title,tt15799866,Silent Night,low,4.7
+2026-11-15T21:44:05.000Z,enwiki,Amber alert,title,tt31450182,Amber Alert,low,3.7
+2026-11-15T21:45:46.000Z,enwiki,Alexander the Great,title,tt0048937,Alexander the Great,low,29.5

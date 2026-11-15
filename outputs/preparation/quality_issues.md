@@ -1,0 +1,40 @@
+### Data quality issues (staged layer)
+
+| rule | table | kind | description | n_rows | pct_of_table | examples |
+| --- | --- | --- | --- | --- | --- | --- |
+| death_before_birth | name_basics | row | deathYear < birthYear | 28 | 0.000 | nm0012634, nm0012635, nm0034922, nm0174595, nm0202552 |
+| birth_in_future | name_basics | row | birthYear > 2026 | 0 | 0.000 |  |
+| death_in_future | name_basics | row | deathYear > 2026 | 0 | 0.000 |  |
+| lifespan_over_120 | name_basics | row | deathYear - birthYear > 120, or alive and born > 120 years ago | 2796 | 0.018 | nm0005637, nm0007417, nm0007643, nm0008495, nm0009123 |
+| end_before_start | title_basics | row | endYear < startYear | 0 | 0.000 |  |
+| start_in_future | title_basics | row | startYear > 2026 (announced titles) | 6238 | 0.048 | tt0418104, tt0578944, tt0578945, tt0578947, tt10275878 |
+| runtime_non_positive | title_basics | row | runtimeMinutes <= 0 | 4 | 0.000 | tt0348126, tt0454640, tt0830188, tt0926344 |
+| runtime_over_1000 | title_basics | row | runtimeMinutes > 1000 | 442 | 0.003 | tt0004052, tt0096679, tt0140739, tt0144722, tt0165127 |
+| invalid_is_adult | title_basics | row | isAdult not in (0, 1) | 0 | 0.000 |  |
+| rating_out_of_range | title_ratings | row | averageRating not in [1, 10] | 0 | 0.000 |  |
+| votes_non_positive | title_ratings | row | numVotes <= 0 | 0 | 0.000 |  |
+| missing_season_number | title_episode | row | seasonNumber is null | 2126237 | 21.189 | tt0031458, tt0042889, tt0046150, tt0053966, tt0058302 |
+| ratings_orphan_title | title_ratings | foreign_key | rows of title_ratings.tconst missing in title_basics.tconst | 0 | 0.000 |  |
+| principals_orphan_title | title_principals | foreign_key | rows of title_principals.tconst missing in title_basics.tconst | 0 | 0.000 |  |
+| principals_orphan_person | title_principals | foreign_key | rows of title_principals.nconst missing in name_basics.nconst | 8115 | 0.008 | nm16528874, nm17752473, nm17752582, nm17752595, nm17752595 |
+| crew_orphan_title | title_crew | foreign_key | rows of title_crew.tconst missing in title_basics.tconst | 0 | 0.000 |  |
+| crew_orphan_director | title_crew | foreign_key | values of title_crew.directors missing in name_basics.nconst | 483 | 0.004 | nm17752595, nm17754813, nm17754887, nm17756181, nm17756181 |
+| crew_orphan_writer | title_crew | foreign_key | values of title_crew.writers missing in name_basics.nconst | 1635 | 0.013 | nm17754813, nm17755016, nm17756250, nm17756392, nm17756826 |
+| episode_orphan_title | title_episode | foreign_key | rows of title_episode.tconst missing in title_basics.tconst | 0 | 0.000 |  |
+| episode_orphan_parent | title_episode | foreign_key | rows of title_episode.parentTconst missing in title_basics.tconst | 5 | 0.000 | tt28606619, tt28606619, tt28606619, tt28606619, tt28606619 |
+| akas_orphan_title | title_akas | foreign_key | rows of title_akas.titleId missing in title_basics.tconst | 8 | 0.000 | tt51017171, tt51013141, tt51013141, tt51013141, tt51013410 |
+| known_for_orphan_title | name_basics | foreign_key | values of name_basics.knownForTitles missing in title_basics.tconst | 49 | 0.000 | tt50969120, tt50969120, tt50969120, tt50969120, tt50969120 |
+| credited_before_birth | title_principals | cross_table | title startYear < person birthYear (archive footage excluded) | 3099 | 0.003 | tt0004194, tt0004210, tt0004712, tt0005313, tt0005314 |
+| credited_long_after_death | title_principals | cross_table | title startYear > deathYear + 5 (archive footage excluded) | 206982 | 0.201 | tt0000443, tt0000609, tt0000668, tt0000776, tt0000844 |
+| episode_before_series | title_episode | cross_table | episode startYear < parent series startYear | 3582 | 0.036 | tt0720292, tt10948728, tt10963686, tt10965276, tt10978860 |
+| episode_parent_not_series | title_episode | cross_table | parent title is not a tvSeries / tvMiniSeries | 0 | 0.000 |  |
+| episode_not_tv_episode | title_episode | cross_table | episode tconst whose titleType is not tvEpisode | 0 | 0.000 |  |
+| duplicate_name_basics_key | name_basics | duplicate | primary key (nconst) not unique | 0 | 0.000 |  |
+| duplicate_title_akas_key | title_akas | duplicate | primary key (titleId, ordering) not unique | 0 | 0.000 |  |
+| duplicate_title_basics_key | title_basics | duplicate | primary key (tconst) not unique | 0 | 0.000 |  |
+| duplicate_title_crew_key | title_crew | duplicate | primary key (tconst) not unique | 0 | 0.000 |  |
+| duplicate_title_episode_key | title_episode | duplicate | primary key (tconst) not unique | 0 | 0.000 |  |
+| duplicate_title_principals_key | title_principals | duplicate | primary key (tconst, ordering) not unique | 0 | 0.000 |  |
+| duplicate_title_ratings_key | title_ratings | duplicate | primary key (tconst) not unique | 0 | 0.000 |  |
+
+_34 of 34 rows shown._
