@@ -22,7 +22,8 @@
 ```text
 compose.yaml            Kafka + Spark containers
 requirements.txt        extra Python packages for the Spark container
-scripts/                download, run-all, smoke test, report update
+scripts/                container set-up, download, run-all, smoke test,
+                        report update
 jobs/common/            shared code (Spark session, I/O, schemas, rules)
 jobs/preparation/       null profile, staging, quality checks, cleaning
 jobs/exploration/       questions Q1 to Q8
@@ -45,8 +46,12 @@ available for Docker, about 15 GB of free disk space, Internet access.
 git clone <repository-url>
 cd <repository>
 docker compose up -d
-docker exec imdb_spark pip install -r requirements.txt
+docker exec imdb_spark bash scripts/setup_container.sh
 ```
+
+`setup_container.sh` makes PySpark importable from `docker exec` (the
+Jupyter image only exposes it to the notebook server) and installs
+`requirements.txt`. Run it again whenever the container is recreated.
 
 The Spark container is called `imdb_spark` and its working directory is
 the repository root. All commands below are run from the host and work in
