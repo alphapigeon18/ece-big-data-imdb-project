@@ -79,21 +79,33 @@ FK_RULES = [
 ]
 
 
+def orphan_keys(child_df, column, parent_df, parent_column, is_array):
+    """Distinct values of ``child_df.column`` missing in the parent table.
+
+    Working on distinct keys (a few million values) instead of full rows
+    (up to ~100 million for title.principals) keeps the shuffle small.
+    """
+    values = (
+        F.explode(column) if is_array else F.col(column)
+    ).alias("__value")
+    keys = child_df.select(values).where(F.col("__value").isNotNull())
+    parents = parent_df.select(F.col(parent_column).alias("__value"))
+    return keys.distinct().join(parents.distinct(), "__value", "left_anti")
+
+
 def fk_orphans(tables, child, column, parent, parent_column, is_array):
     """Rows (or exploded array values) of ``child`` without a parent row."""
-    parents = tables[parent].select(F.col(parent_column).alias("__key"))
+    missing = orphan_keys(
+        tables[child], column, tables[parent], parent_column, is_array
+    )
     df = tables[child]
     if is_array:
-        df = df.select(
-            "*", F.explode_outer(column).alias("__value")
-        ).where(F.col("__value").isNotNull())
-        key = "__value"
+        df = df.select("*", F.explode(column).alias("__value"))
     else:
-        df = df.where(F.col(column).isNotNull()).withColumn(
-            "__value", F.col(column)
-        )
-        key = column
-    return df.join(parents, df[key] == parents["__key"], "left_anti")
+        df = df.withColumn("__value", F.col(column))
+    # The set of missing keys is usually tiny: adaptive query execution
+    # turns this into a broadcast join at run time.
+    return df.join(missing, "__value", "left_semi")
 
 
 def cross_rules(tables):

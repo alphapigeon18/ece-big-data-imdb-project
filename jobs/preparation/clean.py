@@ -59,16 +59,22 @@ def keep_valid_ids(df, keys, array_col, parent_ids):
 
 
 def split_orphans(df, checks, staged):
-    """Split ``df`` into (valid rows, quarantined rows with a reason)."""
+    """Split ``df`` into (valid rows, quarantined rows with a reason).
+
+    Missing parent keys are computed on distinct values first (small
+    shuffle), then the rows are split with a semi / anti join on that
+    small set of keys.
+    """
     rejected = None
     valid = df
     for rule, column, parent, parent_column in checks:
-        parents = staged[parent].select(F.col(parent_column).alias("__pk"))
-        cond = valid[column] == parents["__pk"]
-        bad = valid.join(parents, cond, "left_anti").where(
-            F.col(column).isNotNull()
-        ).withColumn("dq_reason", F.lit(rule))
-        valid = valid.join(parents, cond, "left_semi")
+        missing = quality.orphan_keys(
+            valid, column, staged[parent], parent_column, False
+        ).withColumnRenamed("__value", column).cache()
+        bad = valid.join(missing, column, "left_semi").withColumn(
+            "dq_reason", F.lit(rule)
+        )
+        valid = valid.join(missing, column, "left_anti")
         rejected = bad if rejected is None else rejected.unionByName(bad)
     return valid, rejected
 
