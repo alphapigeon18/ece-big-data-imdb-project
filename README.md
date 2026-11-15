@@ -1,6 +1,6 @@
 # ECE Big Data Processing - IMDb project
 
-- Group: gr-XX
+- Group: gr-03
 - Romain NOM, git username: `alphapigeon`
 - Mathis Groult, git username: `TheBadShip`
 
