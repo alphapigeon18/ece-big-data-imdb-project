@@ -143,9 +143,9 @@ docker compose down -v     # also delete the data volume (IMDb files)
 
 ## Declaration of AI / LLM tools
 
-| Tool | Used for | Not used for |
-| --- | --- | --- |
-| Claude (Anthropic, Claude Opus 5.5, claude.ai) | Generating a first version of the Python / PySpark code of every job, `compose.yaml`, the shell scripts and the synthetic test data generator; suggesting the split of the work into Git branches | Writing the explanations, methodology, analysis and reasoning of `REPORT.md` |
+| Tool | Used for |
+| --- | --- |
+| Claude (Anthropic, Claude Opus 5.5, claude.ai) | Generating a first version of the Python / PySpark code of every job, `compose.yaml`, the shell scripts and the synthetic test data generator; debugging the runs (memory issues, Kafka connector download); suggesting the split of the work into Git branches; drafting the methodology explanations of `REPORT.md`, with the professor's authorisation, reviewed and edited by the team |
 
 All generated code was reviewed, run and, where needed, corrected by the
 team before being committed through reviewed pull requests.

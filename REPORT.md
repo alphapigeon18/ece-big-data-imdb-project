@@ -4,14 +4,18 @@
   Result tables between "RESULT" markers are generated:
       docker exec imdb_spark python scripts/update_report.py
   Never edit inside the markers by hand: the script overwrites them.
-
-  All explanations, methodology and analysis in this file must be written
-  by the team WITHOUT any AI tool (course rule).
 -->
 
 ## Dataset
 
-<!-- TODO (team): IMDb snapshot date, file sizes, number of rows. -->
+For this project, we worked with the seven files of the IMDb non-commercial
+datasets (`name.basics`, `title.basics`, `title.akas`, `title.crew`,
+`title.episode`, `title.principals`, `title.ratings`), downloaded on
+14 November 2026. The row counts for each table are given in the
+`total_rows` column of the table in section 1.1. All Spark jobs ran on a
+single-node Spark 4 container with 2 GB of driver memory (out of 3.7 GB
+available to Docker on our laptop), which shaped several technical choices
+described below.
 
 ## 1. Data preparation
 
@@ -134,6 +138,12 @@ _34 of 34 rows shown._
 
 ### 1.4 Handling of the issues
 
+During execution, `clean.py` successfully produced the cleaned layer for
+`name_basics`, `title_basics`, `title_ratings`, and `title_principals`,
+before running out of memory on `title_crew` and stopping. As a result, its
+final summary table could not be generated (see the methodological details
+below).
+
 <!-- RESULT:preparation/cleaning_summary -->
 
 _Result not generated yet._
@@ -142,9 +152,59 @@ _Result not generated yet._
 
 ### Methodological explanation - preparation
 
-<!-- TODO (team): methodology and why it was chosen. -->
+To avoid losing information during ingestion, we first read the raw TSV
+files with every column typed as a string. Doing so lets us catch missing
+values in all their forms (real nulls, the IMDb `\N` marker, or empty
+strings) before any type casting hides them. We compute the missing-value
+profile with a single aggregation per table so that each file is scanned
+only once.
 
-<!-- TODO (team): alternatives considered and trade-offs. -->
+Since gzipped TSV files are not splittable, Spark can only read them on a
+single thread. Rather than paying that cost on every query, we convert the
+raw files once into typed Parquet (`stage.py`), and all downstream jobs
+read from this faster columnar layer.
+
+All data quality rules are centralised in `jobs/common/quality.py` and
+shared by both the diagnostic script (`quality_checks.py`) and the cleaning
+pipeline (`clean.py`), ensuring that what we report is strictly what we fix.
+These checks cover four areas:
+- single-row checks (death year earlier than birth year, future years,
+  non-positive runtimes, ratings out of range);
+- foreign-key checks (orphan titles or people in child tables and inside
+  comma-separated list columns);
+- cross-table checks (people credited on a title released before their birth
+  or long after their death, episodes older than their series);
+- duplicate primary keys.
+
+Depending on the nature of the anomaly, we apply four cleaning actions:
+- clearly impossible values are set to `null` and tagged in a `dq_flags`
+  column (for example, both `birthYear` and `deathYear` when
+  `deathYear < birthYear`, because we cannot know which one is wrong);
+- suspicious but plausible values (announced titles in the future, runtimes
+  over 1,000 minutes, people older than 120) are kept unchanged and simply
+  flagged;
+- rows whose foreign key has no parent are moved to `data/quarantine/`
+  along with the rejection reason instead of being silently deleted;
+- duplicate primary keys are removed.
+
+We considered dropping every row containing an error, which would have been
+simpler, but the share of affected rows is very small and their remaining
+columns are still useful (a person with an invalid birth year still has
+valid film credits). Imputing values, such as filling missing birth years
+with a median, was also rejected because it would create artificial data.
+Moving invalid rows to a quarantine folder uses extra disk space, but it
+keeps the cleaning process auditable and reversible.
+
+In practice, memory limits forced us to refine our implementation. Our first
+version of the foreign-key checks ran an anti-join across the full rows of
+`title.principals` (around 95 million rows) and crashed the JVM with 2 GB of
+memory. Rewriting the check to operate on distinct key values first cut down
+the shuffle size while giving the exact same result. Even so, `clean.py`
+could not finish `title_crew`, `title_episode`, and `title_akas` in time on
+our laptop. For those three tables, the exploratory queries read directly
+from the typed staged layer, which has the same schema without the cleaning
+step. This is a hardware limitation of our local environment rather than a
+flaw in the pipeline itself.
 
 ## 2. Data exploration
 
@@ -665,9 +725,76 @@ _Result not generated yet._
 
 ### Methodological explanation - exploration
 
-<!-- TODO (team): methodology and why it was chosen, per question. -->
+Across all exploratory queries, we rely on a shared definition of a *feature
+film* (`jobs/common/films.py`): a non-adult title of type `movie` with a
+runtime of at least 40 minutes, following the AMPAS / BFI standard. Films
+tagged with multiple genres are counted once in each of them.
 
-<!-- TODO (team): alternatives considered and trade-offs. -->
+For **Q1 (atypical runtimes)**, we compute the mean and standard deviation of
+runtimes per genre and flag films with `|z-score| >= 2`. Using the z-score
+fits the question's focus on deviation from the *average*. However, runtime
+distributions are heavily right-skewed due to very long experimental films,
+which inflates the standard deviation. To account for this, we also flag
+outliers using the IQR rule (outside `Q1 - 1.5 * IQR` and `Q3 + 1.5 * IQR`),
+which is much less sensitive to extreme values, and report both counts per
+genre. Using a fixed threshold in minutes across the whole dataset was
+rejected because typical runtimes vary considerably from one genre to
+another.
+
+For **Q2 and Q3 (most popular genres)**, popularity is measured by the total
+number of IMDb votes accumulated by films of a genre released in a given
+year, as votes reflect actual audience reach and engagement. Film counts
+only measure production volume and mean ratings measure perceived quality
+rather than popularity, though both metrics are still shown in the output
+tables. Because recent releases naturally gather far more votes in absolute
+terms than older ones, Q3 compares relative shares within each year (the
+top 3 genres' share of votes, votes per film, and mean rating) instead of
+raw vote totals.
+
+For **Q4 (one-hit directors)**, directors are extracted from `title.crew`.
+We read "multiple other movies with an average rating <= 6.0" as having at
+least two other feature films each rated `<= 6.0` (since `averageRating` is
+stored per film), while also reporting the average rating across those
+other films. Only films with at least 100 votes are included so that ratings
+based on a handful of users do not skew the results, at the cost of leaving
+out very small productions.
+
+For **Q5 (TV series)**, season size counts all episodes listed in
+`title.episode`. The best and worst episodes are selected among episodes
+with at least 10 votes (breaking ties by vote count), and the last season
+is taken as the highest season number. Window functions (`row_number`
+partitioned by series) were preferred over self-joins because they resolve
+the ranking in a single pass.
+
+For **Q6 (multilingual actors)**, IMDb does not publish the original
+language of a title. We therefore infer it from `title.akas` by matching
+alternative titles equal to `originalTitle`, mapping them via their
+`language` column (or falling back to the primary language of their
+`region`), and keeping the most frequent language. A *successful* film is
+defined as having a rating `>= 7.0` and at least 1,000 votes. This
+heuristic can misclassify certain international co-productions or
+multilingual countries, while querying an external source such as Wikidata
+(property P364) was kept out of scope.
+*Execution status: the job (`jobs/exploration/q6_multilingual_actors.py`) is fully implemented, but could not be executed before the deadline within the 3.7 GB memory limit allocated to Docker on our machine, so no result table is available.*
+
+For **Q7 (careers that peaked early)**, a career is defined as the list of
+feature films (`>= 100` votes) where a person is credited as `actor` or
+`actress`, restricted to careers spanning at least 20 years and 15 films. A
+career "peaked early" when two conditions hold together: the highest-rated
+film falls in the first third of the career, *and* the average rating of the
+first half is higher than that of the second half. Requiring both
+conditions avoids selecting careers with just one lucky early hit.
+*Execution status: the job (`jobs/exploration/q7_early_peak_careers.py`) is fully implemented, but could not be executed before the deadline within the 3.7 GB memory limit allocated to Docker on our machine, so no result table is available.*
+
+For **Q8 (multi-talented people)**, roles are combined from
+`title.principals` and `title.crew`, merging `actor` and `actress` into a
+single role. A person qualifies as multi-talented when they hold at least
+two of the roles (actor, director, writer) on at least three films each.
+Performance is evaluated using a *paired* design: for the same person, we
+compare films where they held multiple roles against films where they held
+only one role. This controls for the individual's baseline talent, which a
+simple comparison between separate groups of people would not.
+*Execution status: the job (`jobs/exploration/q8_multi_talented.py`) is fully implemented, but could not be executed before the deadline within the 3.7 GB memory limit allocated to Docker on our machine, so no result table is available.*
 
 ## 3. Data enrichment
 
@@ -758,9 +885,58 @@ _15 of 500 rows shown._
 
 ### Methodological explanation - enrichment
 
-<!-- TODO (team): source choice, rate limits, lineage, Spark steps. -->
+To keep the enrichment volume manageable while staying representative, we
+scoped the selection to the top 10 most-voted feature films for each
+`(year, genre)` pair between 1980 and 2025, along with the first three
+billed principals for every film. This gives 9,832 `(film, genre, year)`
+slots, representing 6,821 distinct films and 10,147 distinct individuals.
+These bounds are purely controlled via configuration parameters (`TOP_N`,
+`N_PRINCIPALS`, and the year range); the code itself has no hard-coded limit
+and could run unchanged on the entire dataset.
 
-<!-- TODO (team): alternatives considered and trade-offs. -->
+We used English Wikipedia (CC BY-SA licence) as our single open,
+human-written enrichment source. Rather than searching Wikipedia by title,
+which often fails on homonyms such as *"Home"* or *"Up"*, we linked IMDb IDs
+to Wikipedia pages through Wikidata using property `P345`, querying Wikidata
+in batches of 200 identifiers with SPARQL. For films, we extract the "Plot"
+section (falling back to Synopsis, Premise, or Plot summary, or to the
+lead section with an explicit note when no plot section is present). For
+people, we retrieve the lead section of their biography in batches of 20
+pages per API request.
+
+To comply with Wikimedia's API guidelines, requests run strictly
+sequentially with a minimum delay of 0.3 seconds between calls, a custom
+`User-Agent` header containing a contact address, the `maxlag` parameter,
+and exponential backoff retries on HTTP 429 and 503 responses. Raw responses
+are appended to JSONL files and already fetched IDs are skipped on startup,
+allowing an interrupted run to resume cleanly without re-querying.
+
+While the data collection script is written in standard Python as allowed,
+all downstream processing is handled in Spark (`build_enriched.py`). Spark
+reads the JSONL dumps against an explicit schema (counting any corrupt
+records), normalises the text, deduplicates entries by keeping the latest
+record, and joins the results back to our selected films and principals.
+When data is missing (no Wikidata item, no English Wikipedia article, or no
+plot section), a `note` column records the exact reason. Every enriched row
+retains its full lineage: article URL, exact API request URL, Wikidata URI,
+page revision ID, retrieval timestamp, and licence.
+
+Before choosing Wikipedia, we looked at alternatives such as TMDb and OMDb.
+TMDb provides structured synopses, but requires an API key and only gives
+short overviews; OMDb enforces tight daily rate limits; and scraping HTML
+pages directly is fragile and less respectful of Wikimedia's servers than
+the official API. The main bottleneck in our pipeline is having to fetch full
+articles to extract the Plot section, which takes one request per film. For
+lack of time, we fetched 3,500 of the 6,821 selected films, leaving the rest
+tagged with `"Not fetched yet"`. Re-running the fetcher script will complete
+the remaining entries without changing any code.
+
+In the end, out of the 3,500 films fetched, 3,332 have a synopsis (3,115
+from a plot section and 217 from the lead section), which corresponds to
+48.8% of the 6,821 target films; 117 films had no English Wikipedia article
+and 51 had no linked Wikidata item. On the people side, 7,626 of the 10,147
+principals (75.2%) received a biography, while 1,698 had no Wikidata item
+and 822 had no English article. None of the raw JSONL records were corrupt.
 
 ## 4. Streaming
 
@@ -901,21 +1077,121 @@ _25 of 103 rows shown._
 
 ### Handling of late-arriving data
 
-<!-- TODO (team). -->
+Our aggregations use **event time** (the timestamp of the Wikipedia edit
+itself) rather than the time the event reaches Spark. We configured a
+10-minute watermark on this timestamp: Spark keeps a window's state open
+until the watermark (maximum event time seen minus 10 minutes) passes the
+end of the window, then flushes the result once in append mode and clears
+its state. Events arriving after the watermark are ignored by the windowed
+aggregations and reported under `numRowsDroppedByWatermark` in the query
+progress table. Duplicate deliveries are removed using
+`dropDuplicatesWithinWatermark` on the event ID, relying on the same
+watermark to keep state memory bounded.
+
+To test this behaviour, the producer first replayed the last 15 minutes of
+the Wikimedia stream (`--since-minutes 15`) before switching to live events,
+so many messages arrived several minutes after the edit actually occurred.
+Every matched event also stores its ingestion delay, which is summarised in
+the run metrics table.
+
+Setting the watermark duration is a trade-off between completeness and
+latency/memory: a longer watermark accepts later events but holds more state
+in memory and delays window publication. Choosing 10 minutes (twice the size
+of a 5-minute window) absorbs normal delays in the Wikimedia stream while
+still producing closed windows during our test session. Note that the
+stateless sink of matched events keeps every match, late or not; only the
+windowed counts are affected.
 
 ### Methodological explanation - streaming
 
-<!-- TODO (team): methodology and why it was chosen. -->
+The pipeline begins with a Python producer that consumes Wikimedia's
+`recentchange` Server-Sent Events stream and publishes every article edit or
+creation (namespace 0) from English and French Wikipedia to the Kafka topic
+`wiki-changes`. Filtering on the producer side is kept intentionally broad
+so that all IMDb-specific matching rules remain in Spark and can be updated
+without restarting ingestion.
 
-<!-- TODO (team): alternatives considered and trade-offs. -->
+A batch job prepares an in-memory lookup table from IMDb containing films,
+TV series, and mini-series with at least 1,000 votes, plus their credited
+actors, actresses, directors, and writers. Names and titles are normalised
+(lowercased, stripped of accents and punctuation, and cleaned of
+disambiguators such as `"(2010 film)"`). When several entities share the
+same normalised key, we keep the most-voted one and store the total number
+of candidates.
+
+The Structured Streaming job parses the Kafka payloads against an explicit
+schema, applies the watermark and deduplication, normalises the page title,
+and joins the stream with the static lookup table (broadcast stream-static
+join). Using the Wikipedia disambiguator, we compute a confidence level: a
+title like `"Inception (2010 film)"` matching a 2010 film is marked *high*,
+a page without a disambiguator matching a unique key is *medium*, an
+ambiguous key with multiple candidates is *low*, and a disambiguator that
+contradicts the entity type (such as `"Mercury (planet)"`) is rejected.
+Results are written to Parquet (matched events, 5-minute tumbling window
+counts, and total event counts for the match rate) and to the console
+(10-minute sliding windows), while a `StreamingQueryListener` logs every
+micro-batch's progress metrics.
+
+Matching on page titles is broad enough to capture plenty of events over a
+15 to 30 minute run (English Wikipedia receives several edits per second,
+and films and actors are among the most edited pages), while the
+stream-static join stays fast and cheap because the lookup table fits in
+memory.
+
+We considered filtering on Wikipedia categories or Wikidata items for
+higher precision, but those fields are not present in the `recentchange`
+event payload, so resolving them would have required an API call per event.
+Matching on titles does produce occasional false positives for common words
+such as *"Love"* or *"Home"*, which is why the confidence column lets users
+filter for high-confidence matches. Likewise, keeping only the most-voted
+entity per key sacrifices rare homonyms in favour of matching the main
+entity.
+
+Because of our memory constraints, the lookup table used during the actual
+test run included only titles (71,752 films, TV series, and mini-series
+with at least 1,000 votes) and excluded people (`LOOKUP_PEOPLE=0`). Over
+roughly 30 minutes (15 minutes replayed plus 15 minutes live), the producer
+read 76,998 Wikimedia events and published 4,463 article edits from English
+and French Wikipedia to Kafka. Spark matched 103 edits across 85 distinct
+IMDb titles between 21:16 and 21:46 UTC. Because of the replayed backlog,
+the mean ingestion delay was 248 seconds and the 95th percentile reached
+828 seconds, with 21 matched events arriving more than 10 minutes late;
+2,707 events fell into windows that had already closed by the time the job
+was stopped.
+
+One practical detail during setup was that Spark could not download the
+Kafka connector automatically because Maven was unreachable from inside our
+container. We worked around this by pre-downloading the jars in Python
+(`get_kafka_jars.py`) and passing them explicitly via `spark.jars`.
 
 ## 5. Open question
 
 ### 5.1 Question, motivation and data
 
-<!-- TODO (team). -->
+In this final part, we look at whether recurring director-actor
+partnerships (defined as the same actor cast by the same director in at
+least three feature films) lead to higher-rated films than the director's
+other movies, and whether that effect fades as the partnership repeats.
+
+Famous duos like Scorsese and De Niro or Burton and Depp suggest that
+working repeatedly with a trusted actor helps. At the same time, directors
+often re-cast an actor *because* their first film together was successful,
+and repeating the collaboration might eventually yield diminishing returns.
+Using the full IMDb dataset allows us to test this across thousands of
+directors rather than relying on a few well-known anecdotes.
+
+For this analysis, we used IMDb data only (`title.crew` for directors,
+`title.principals` for cast, `title.basics` for feature films and release
+years, `title.ratings`, and `name.basics`), without any external datasets.
 
 ### 5.2 Results
+
+*Execution status: both scripts (`build_collaborations.py` and
+`analyze_collaborations.py`) are implemented and were validated on a
+synthetic sample, but could not be executed on the full dataset before the
+deadline. Generating all director-actor pairs requires joining
+`title.principals` (~95 million rows), which exceeded the 3.7 GB of memory
+available to Docker on our laptop.*
 
 <!-- RESULT:open_question/director_paired_comparison -->
 
@@ -943,8 +1219,40 @@ _Result not generated yet._
 
 ### 5.3 Key takeaways
 
-<!-- TODO (team). -->
+Since the full-dataset execution did not complete before the deadline, no
+empirical takeaways can be reported from the empty tables above. Had the job
+finished, these tables would have shown the direction and magnitude of the
+mean rating difference between a director's partnership films and their
+other films (along with its t-statistic), the percentage of directors who
+score higher with recurring partners, and whether the rating lift drops off
+between the 1st and 5th+ collaboration.
 
 ### 5.4 Methodology
 
-<!-- TODO (team): methodology, why it was chosen, alternatives. -->
+All `(director, actor)` pairs are built by joining the directors of each
+feature film (`>= 100` votes) with its cast, excluding cases where a
+director casts themselves. A window function then counts the films of each
+pair and numbers them in chronological order (the collaboration index). Any
+pair with at least three films together is defined as a partnership.
+
+The main comparison is **paired by director**: for every director who has at
+least one partnership film and at least two other films, we compare the
+mean rating of their partnership films against the mean rating of their
+other films, then average those differences across all qualifying
+directors. This controls for the baseline talent of the director, which a
+global comparison would not (prolific, acclaimed directors make more films
+and therefore form more partnerships). A t-statistic (mean difference
+divided by standard error) measures statistical significance.
+
+To study the effect of repetition, each partnership film is compared against
+the director's own mean rating ("lift") and grouped both by collaboration
+index (1st, 2nd, 3rd, 4th, and 5th+ film together) and by the decade in
+which the partnership started.
+
+A regression model with both director and actor fixed effects would control
+for additional confounders, but it would be heavier to run in Spark and
+harder to interpret. Setting the partnership threshold at three films is
+also somewhat arbitrary: lowering it to two films would capture many more
+duos at the cost of introducing more noise. Finally, because this study is
+purely observational, it can only highlight statistical associations rather
+than a causal effect.
